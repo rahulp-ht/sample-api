@@ -10,6 +10,14 @@ http.createServer((req, res) => {
     res.end('1.0.0');
     return;
   }
-  res.end('Welcome to Sample API');
+  if (req.url === '/info') {
+   res.setHeader('Content-Type', 'application/json');
+   res.end(JSON.stringify({
+     name: 'sample-api',
+     version: '1.0.0'
+   }));
+   return;
+  } 
+  res.end('Welcome to Sample API Production');
 
 }).listen(port, () => console.log(`Listening on ${port}`));
