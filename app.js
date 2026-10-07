@@ -11,5 +11,5 @@ http.createServer((req, res) => {
     return;
   }
 
-  res.end('Sample API v1');
+  res.end('Sample API - Home');
 }).listen(port, () => console.log(`Listening on ${port}`));
