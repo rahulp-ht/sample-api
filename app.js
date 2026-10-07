@@ -10,6 +10,6 @@ http.createServer((req, res) => {
     res.end('1.0.0');
     return;
   }
+  res.end('Welcome to Sample API');
 
-  res.end('Sample API - Home');
 }).listen(port, () => console.log(`Listening on ${port}`));
