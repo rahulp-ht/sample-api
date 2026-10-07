@@ -18,6 +18,6 @@ http.createServer((req, res) => {
    }));
    return;
   } 
-  res.end('Welcome to Sample API');
+  res.end('Welcome to Sample API - Feature');
 
 }).listen(port, () => console.log(`Listening on ${port}`));
