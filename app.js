@@ -6,6 +6,10 @@ http.createServer((req, res) => {
     res.end('OK');
     return;
   }
+  if (req.url == '/version'){
+    res.end('1.0.0');
+    return;
+  }
 
   res.end('Sample API v1');
 }).listen(port, () => console.log(`Listening on ${port}`));
