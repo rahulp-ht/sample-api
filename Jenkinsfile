@@ -40,9 +40,12 @@ pipeline {
         }
 
         stage('Publish to Docker Hub') {
-            when {
-                branch 'main'
-            }
+             when {
+        expression {
+            env.BRANCH_NAME == 'main' ||
+            env.GIT_BRANCH == 'origin/main'
+        }
+    }
             steps {
                 withCredentials([
                     usernamePassword(
