@@ -1,0 +1,23 @@
+```groovy
+pipeline {
+    agent any
+    environment {
+        IMAGE = 'sample-api'
+    }
+    stages {
+        stage('Install') {
+            steps { sh 'npm ci' }
+        }
+        stage('Test') {
+            steps { sh 'npm test' }
+        }
+        stage('Build Image') {
+            steps { sh 'docker build -t $IMAGE:$BUILD_NUMBER .' }
+        }
+    }
+    post {
+        success { echo 'Build succeeded' }
+        failure { echo 'Build failed - read the stage log' }
+    }
+}
+```
