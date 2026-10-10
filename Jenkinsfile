@@ -33,19 +33,18 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                    docker build \
-                      -t "$IMAGE_NAME:$COMMIT_SHA" .
+                    docker build -t "$IMAGE_NAME:$COMMIT_SHA" .
                 '''
             }
         }
 
         stage('Publish to Docker Hub') {
-             when {
-        expression {
-            env.BRANCH_NAME == 'main' ||
-            env.GIT_BRANCH == 'origin/main'
-        }
-    }
+            when {
+                expression {
+                    env.BRANCH_NAME == 'main' ||
+                    env.GIT_BRANCH == 'origin/main'
+                }
+            }
             steps {
                 withCredentials([
                     usernamePassword(
@@ -55,15 +54,80 @@ pipeline {
                     )
                 ]) {
                     sh '''
+                        set -eu
                         set +x
+
                         printf '%s' "$DOCKERHUB_TOKEN" |
-                          docker login \
-                            --username "$DOCKERHUB_USER" \
-                            --password-stdin
+                            docker login \
+                                --username "$DOCKERHUB_USER" \
+                                --password-stdin
 
                         docker push "$IMAGE_NAME:$COMMIT_SHA"
 
                         docker logout
+                    '''
+                }
+            }
+            post {
+                always {
+                    sh 'docker logout >/dev/null 2>&1 || true'
+                }
+            }
+        }
+
+        stage('Run Container and Verify') {
+            when {
+                expression {
+                    env.BRANCH_NAME == 'main' ||
+                    env.GIT_BRANCH == 'origin/main'
+                }
+            }
+            steps {
+                sh '''
+                    set -eu
+
+                    IMAGE="$IMAGE_NAME:$COMMIT_SHA"
+                    CONTAINER="sample-api-ci-$BUILD_NUMBER"
+
+                    docker pull "$IMAGE"
+                    docker rm -f "$CONTAINER" 2>/dev/null || true
+
+                    docker run -d \
+                        --name "$CONTAINER" \
+                        -p 127.0.0.1:3000:3000 \
+                        "$IMAGE"
+
+                    READY=0
+                    for i in $(seq 1 20); do
+                        if curl -fsS \
+                            http://127.0.0.1:3000/health; then
+                            READY=1
+                            break
+                        fi
+                        sleep 2
+                    done
+
+                    if [ "$READY" -ne 1 ]; then
+                        echo "Health check failed"
+                        docker logs "$CONTAINER"
+                        exit 1
+                    fi
+
+                    echo
+                    echo "Checking /version"
+                    curl -fsS http://127.0.0.1:3000/version
+
+                    echo
+                    echo "Checking /info"
+                    curl -fsS http://127.0.0.1:3000/info
+                    echo
+                '''
+            }
+            post {
+                always {
+                    sh '''
+                        docker rm -f "sample-api-ci-$BUILD_NUMBER" \
+                            2>/dev/null || true
                     '''
                 }
             }
