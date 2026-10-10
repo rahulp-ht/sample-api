@@ -123,21 +123,11 @@ pipeline {
                     echo
                 '''
             }
-            post {
-                always {
-                    sh '''
-                        docker rm -f "sample-api-ci-$BUILD_NUMBER" \
-                            2>/dev/null || true
-                    '''
-                }
             }
         }
     }
 
     post {
-        always {
-            sh 'docker image prune -f || true'
-        }
         success {
             echo 'CI pipeline completed successfully.'
         }
