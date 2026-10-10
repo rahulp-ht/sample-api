@@ -94,13 +94,13 @@ pipeline {
 
                     docker run -d \
                         --name "$CONTAINER" \
-                        -p 127.0.0.1:3000:3000 \
+                        --nework jenkins-net \
                         "$IMAGE"
 
                     READY=0
                     for i in $(seq 1 20); do
                         if curl -fsS \
-                            http://127.0.0.1:3000/health; then
+                           http://"$CONTAINER":3000/health; then
                             READY=1
                             break
                         fi
@@ -115,11 +115,11 @@ pipeline {
 
                     echo
                     echo "Checking /version"
-                    curl -fsS http://127.0.0.1:3000/version
+                    curl -fsS http://"$CONTAINER":3000/version
 
                     echo
                     echo "Checking /info"
-                    curl -fsS http://127.0.0.1:3000/info
+                    curl -fsS http://"$CONTAINER":3000/info
                     echo
                 '''
             }
