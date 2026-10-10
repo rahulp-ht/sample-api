@@ -1,4 +1,3 @@
-```groovy
 pipeline {
     agent any
     environment {
@@ -20,4 +19,3 @@ pipeline {
         failure { echo 'Build failed - read the stage log' }
     }
 }
-```
