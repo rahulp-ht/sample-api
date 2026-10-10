@@ -94,7 +94,7 @@ pipeline {
 
                     docker run -d \
                         --name "$CONTAINER" \
-                        --nework jenkins-net \
+                        --network jenkins-net \
                         "$IMAGE"
 
                     READY=0
