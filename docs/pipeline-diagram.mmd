@@ -1,0 +1,28 @@
+flowchart TD
+    A[Developer commit on feature branch] --> B[GitHub Pull Request]
+    B --> C[Jenkins: checkout + validate]
+    C --> D[Lint + unit tests]
+    D --> E[Dependency / secret / static checks]
+    E --> F[Build container image]
+    F --> G[Integration test in container]
+    G --> H{All checks pass?}
+    H -- No --> X[Stop pipeline + notify author]
+    H -- Yes --> I[PR checks green; review + merge]
+    I --> J[Push to main]
+    J --> K[Build once + tag with commit SHA]
+    K --> L[Image vulnerability scan]
+    L --> M[Push immutable image to Docker Hub]
+    M --> N[Deploy same digest to Dev]
+    N --> O[Smoke tests + health checks]
+    O --> P[Deploy same digest to Staging]
+    P --> Q[Integration / acceptance tests]
+    Q --> R{Staging successful?}
+    R -- No --> Y[Stop promotion + notify team]
+    R -- Yes --> S[Manual production approval]
+    S --> T[Blue-green production deployment]
+    T --> U[Health checks + smoke tests]
+    U --> V{Healthy?}
+    V -- Yes --> W[Switch traffic / release complete]
+    V -- No --> Z[Rollback traffic to previous version + alert]
+    TAG[Release tag vX.Y.Z] --> REL[Create release record pointing to tested SHA]
+    REL --> M
